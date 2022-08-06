@@ -3,14 +3,69 @@ import { Button, ButtonGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { Component } from 'react';
 import 'sf-font';
+import axios from 'axios';
 
+var account = null;
+var contract = null;
+var vaultcontract = null;
+var web3 = null;
 
-function App() {
+const NFTCONTRACT = "0x5E021f83C6Be88AE0B10a8D3925a2b3326AFB87B";
+const STAKINGCONTRACT = "0x09aE75315fE2E63271B4F218C4b00F4fF143052A"
+const polygonscanapikey = "DBQX5JUSAVUZRK8CC4IN2UZF9N2HA63P4U";
+const polygonscanapi = "https://api-testnet.polygonscan.com/api"
+const moralisapi = "https://deep-index.moralis.io/api/v2/";
+const moralisapikey = "2VBV4vaCLiuGu6Vu7epXKlFItGe3jSPON8WV4CrXKYaNBEazEUrf1xwHxbrIo1oM";
+const nftpng = "https://ipfs.io/ipfs/QmavM8Zpo9bD3r4zEnhbbBLLvHyfr1YL7f1faG3ovaeSSG/";
+
+class App extends Component {
+	constructor() {
+		super();
+		this.state = {
+			balance: [],
+			nftdata: [],
+			rawearn: [],
+		};
+	}
+
+	handleModal(){  
+		this.setState({show:!this.state.show})  
+	} 
+
+	handleNFT(nftamount) {
+		this.setState({outvalue:nftamount.target.value});
+  	}
+
+	async componentDidMount() {
+		
+		await axios.get((polygonscanapi + `?module=stats&action=tokensupply&contractaddress=${NFTCONTRACT}&apikey=${polygonscanapikey}`))
+		.then(outputa => {
+            this.setState({
+                balance:outputa.data
+            })
+            console.log(outputa.data)
+        })
+		let config = {'X-API-Key': moralisapikey, 'accept': 'application/json'};
+		await axios.get((moralisapi + `/nft/${NFTCONTRACT}/owners?chain=mumbai&format=decimal`), {headers: config})
+		.then(outputb => {
+			const { result } = outputb.data
+            this.setState({
+                nftdata:result
+            })
+            console.log(outputb.data)
+        })
+	}
+  
+  render() {
+	const {balance} = this.state;
+	const {nftdata} = this.state;
+	const {outvalue} = this.state;
+
   return (
     <div className="App nftapp">
-        <nav class="navbar navbarfont navbar-expand-md navbar-dark bg-dark mb-4">
+        <nav class="navbar navbarfont navbarglow navbar-expand-md navbar-dark bg-dark mb-4">
           <div class="container-fluid" style={{ fontFamily: "SF Pro Display" }}>
-            <a class="navbar-brand px-5" style={{ fontWeight: "800", fontSize: '25px' }} href="#"></a><img src="Logo_Gracify.png" width="7%" />
+            <a class="navbar-brand px-5" style={{ fontWeight: "800", fontSize: '25px' }} href="#"></a><img src="Logo_Gracify.png" width="11%" />
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
@@ -67,7 +122,7 @@ function App() {
             <h6 className="pt-2" style={{ fontFamily: "SF Pro Display", fontWeight: "300", fontSize: "18px" }}>Buy with your preferred crypto!</h6>
             <div className="row px-2 pb-2 row-style">
               <div className="col ">
-                <Button className="button-style" style={{ border: "0.1px", borderRadius: "14px", boxShadow: "1px 1px 5px #000000" }}>
+                <Button className="button-style" style={{ border: "0.2px", borderRadius: "14px", boxShadow: "1px 1px 5px #000000" }}>
                   <img src={"Logo_Gracifyr.png"} width="100%" />
                 </Button>
               </div>
@@ -93,7 +148,7 @@ function App() {
         <div className='col'>
           <body className='nftstaker border-0'>
             <form  style={{ fontFamily: "SF Pro Display" }} >
-              <h2 style={{ borderRadius: '14px', fontWeight: "300", fontSize: "25px" }}>N2DR NFT Staking Vault </h2>
+              <h2 style={{ borderRadius: '14px', fontWeight: "300", fontSize: "25px" }}>Gracify NFT Staking Vault </h2>
               <h6 style={{ fontWeight: "300" }}>First time staking?</h6>
               <Button className="btn" style={{ backgroundColor: "#ffffff10", boxShadow: "1px 1px 5px #000000" }} >Authorize Your Wallet</Button>
               <div className="row px-3">
@@ -120,11 +175,12 @@ function App() {
                       </tr>
                     </table>
                   </form>
+                  </div>
                   <img className="col-lg-4" src="art.png"/>
                   <div className="col">
                     <form className='stakingrewards' style={{ borderRadius: "25px", boxShadow: "1px 1px 15px #ffffff", fontFamily: "SF Pro Display" }}>
                       <h5 style={{ color: "#FFFFFF", fontWeight: '300' }}> Staking Rewards</h5>
-                      <Button style={{ backgroundColor: "#ffffff10", boxShadow: "1px 1px 5px #000000" }} >Earned N2D Rewards</Button>
+                      <Button style={{ backgroundColor: "#ffffff10", boxShadow: "1px 1px 5px #000000" }} >Earned GRACE Rewards</Button>
                       <div id='earned' style={{ color: "#39FF14", marginTop: "5px", fontSize: '25px', fontWeight: '500', textShadow: "1px 1px 2px #000000" }}><p style={{ fontSize: "20px" }}>Earned Tokens</p></div>
                       <div className='col-12 mt-2'>
                         <div style={{ color: 'white' }}>Claim Rewards</div>
@@ -135,7 +191,7 @@ function App() {
                 </div>
                 <div className="row px-4 pt-2">
                   <div class="header">
-                    <div style={{ fontSize: '25px', borderRadius: '14px', color: "#ffffff", fontWeight: "300" }}>N2DR NFT Staking Pool Active Rewards</div>
+                    <div style={{ fontSize: '25px', borderRadius: '14px', color: "#ffffff", fontWeight: "300" }}>Gracify NFT Staking Pool Active Rewards</div>
                     <table className='table px-3 table-bordered table-dark'>
                       <thead className='thead-light'>
                         <tr>
@@ -146,36 +202,36 @@ function App() {
                       </thead>
                       <tbody>
                         <tr>
-                          <td>N2D Bronze Collection</td>
+                          <td>Gracify Bronze Collection</td>
                           <td class="amount" data-test-id="rewards-summary-ads">
-                            <span class="amount">0.50</span>&nbsp;<span class="currency">N2DR</span>
+                            <span class="amount">0.50</span>&nbsp;<span class="currency">rGRACE</span>
                           </td>
                           <td class="exchange">
                             <span class="amount">2</span>&nbsp;<span class="currency">NFTs/M</span>
                           </td>
                         </tr>
                         <tr>
-                          <td>N2D Silver Collection</td>
+                          <td>Gracify Silver Collection</td>
                           <td class="amount" data-test-id="rewards-summary-ac">
-                            <span class="amount">2.50</span>&nbsp;<span class="currency">N2DR</span>
+                            <span class="amount">2.50</span>&nbsp;<span class="currency">rGRACE</span>
                           </td>
                           <td class="exchange"><span class="amount">10</span>&nbsp;<span class="currency">NFTs/M</span>
                           </td>
                         </tr>
                         <tr className='stakegoldeffect'>
-                          <td>N2D Gold Collection</td>
-                          <td class="amount" data-test-id="rewards-summary-one-time"><span class="amount">1</span>&nbsp;<span class="currency">N2DR+</span>
+                          <td>Gracify Gold Collection</td>
+                          <td class="amount" data-test-id="rewards-summary-one-time"><span class="amount">1</span>&nbsp;<span class="currency">rGRACE+</span>
                           </td>
                           <td class="exchange">
                             <span class="amount">25 NFTs/M or </span>
-                            <span class="currency">100 N2DR/M</span>
+                            <span class="currency">100 rGRACE/M</span>
                           </td>
                         </tr>
                       </tbody>
                     </table>
 
                     <div class="header">
-                      <div style={{ fontSize: '25px', borderRadius: '14px', fontWeight: '300' }}>N2DR Token Stake Farms</div>
+                      <div style={{ fontSize: '25px', borderRadius: '14px', fontWeight: '300' }}>rGRACE Token Stake Farms</div>
                       <table className='table table-bordered table-dark' style={{ borderRadius: '14px' }} >
                         <thead className='thead-light'>
                           <tr>
@@ -185,15 +241,15 @@ function App() {
                         </thead>
                         <tbody>
                           <tr>
-                            <td>Stake N2DR to Earn N2DR</td>
+                            <td>Stake your NFT to Earn rGRACE</td>
                             <td class="amount" data-test-id="rewards-summary-ads">
-                              <span class="amount">0.01</span>&nbsp;<span class="currency">Per N2DR</span>
+                              <span class="amount">0.01</span>&nbsp;<span class="currency">Per nGRACE</span>
                             </td>
                           </tr>
                           <tr>
-                            <td>Stake N2DR to Earn N2DR+</td>
+                            <td>Stake 2 NFTs to Earn rGRACIFY+</td>
                             <td class="amount" data-test-id="rewards-summary-ac">
-                              <span class="amount">0.005</span>&nbsp;<span class="currency">Per N2DR</span>
+                              <span class="amount">0.005</span>&nbsp;<span class="currency">Per rGRACE</span>
                             </td>
                           </tr>
                         </tbody>
@@ -201,13 +257,46 @@ function App() {
                     </div>
                   </div>
                 </div>
-                </div>
             </form>
           </body>
         </div>
       </div>
-                </div>
-  );
+        <div className="container col-lg-11">
+          <div className="row items px-3 pt-3">
+            <div className="ml-3 mr-3" style={{ display: "inline-grid", gridTemplateColumns: "repeat(4, 5fr)", columnGap: "20px" }}>
+              {nftdata.map((result, i) => {
+                async function stakeit() {
+                  vaultcontract.methods.stake([result.token_id]).send({ from: account });
+                }
+                async function unstakeit() {
+                  vaultcontract.methods.unstake([result.token_id]).send({ from: account });
+                }
+                return (
+                  <div className="card nft-card mt-3" key={i} >
+                    <div className="image-over">
+                      <img className="card-img-top" src={nftpng + result.token_id + '.png'} alt="" />
+                    </div>
+                    <div className="card-caption col-12 p-0">
+                      <div className="card-body">
+                        <h5 className="mb-0">Net2Dev Collection NFT #{result.token_id}</h5>
+                        <h5 className="mb-0 mt-2">Location Status<p style={{ color: "#39FF14", fontWeight: "bold", textShadow: "1px 1px 2px #000000" }}>{result.owner_of}</p></h5>
+                        <div className="card-bottom d-flex justify-content-between">
+                          <input key={i} type="hidden" id='stakeid' value={result.token_id} />
+                          <Button style={{ marginLeft: '2px', backgroundColor: "#ffffff10" }} onClick={stakeit}>Stake it</Button>
+                          <Button style={{ marginLeft: '2px', backgroundColor: "#ffffff10" }} onClick={unstakeit}>Unstake it</Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 }
 
 export default App;
+
